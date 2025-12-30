@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -e
 
 # Ensure required inputs are set
 if [[ -z "$PROJECT_ID" || -z "$ENVIRONMENT_NAME" || -z "$APP_NAME" || -z "$COMPONENT_NAME" || -z "$VERSION" || -z "$ACCESS_KEY" || -z "$SECRET_KEY" || -z "$REGION" || -z "$BRANCH" ]]; then
@@ -8,8 +8,8 @@ if [[ -z "$PROJECT_ID" || -z "$ENVIRONMENT_NAME" || -z "$APP_NAME" || -z "$COMPO
 fi
 
 # Set default EPI if not provided and Dockerfile
-EPI="${EPI:-0}"
-DOCKERFILE_PATH="${DOCKERFILE_PATH:-Dockerfile}"
+EPI=${EPI:-0}
+DOCKERFILE_PATH=${DOCKERFILE_PATH:-Dockerfile}
 
 # Dockerfile path must be relative (CAE requirement)
 if [[ "$DOCKERFILE_PATH" == /* ]]; then
@@ -32,7 +32,7 @@ send "$REGION\r"
 expect eof
 EOF
 
-# Set CLI language
+# Set CLI language to Chinese
 hcloud configure set --cli-lang=cn
 
 echo "Huawei Cloud CLI configured successfully."
@@ -47,40 +47,28 @@ expect eof
 EOF
 
 # Get Environment ID
-ENV_ID=$(hcloud CAE ListEnvironments \
-  --project_id="$PROJECT_ID" 2>/dev/null |
-  jq -r ".items[] | select(.name == \"$ENVIRONMENT_NAME\") | .id")
-
-if [[ -z "$ENV_ID" ]]; then
-  echo "::error::Environment '$ENVIRONMENT_NAME' not found."
-  exit 1
+ENV_ID=$(hcloud CAE ListEnvironments --project_id="$PROJECT_ID" 2>/dev/null | jq -r ".items[] | select(.name == \"$ENVIRONMENT_NAME\") | .id")
+if [ -z "$ENV_ID" ]; then
+    echo "Error: Environment '$ENVIRONMENT_NAME' not found."
+    exit 1
 fi
 
 echo "Found Environment ID: $ENV_ID"
 
 # Get Application ID
-APP_ID=$(hcloud CAE ListApplications \
-  --X-Environment-ID="$ENV_ID" \
-  --project_id="$PROJECT_ID" 2>/dev/null |
-  jq -r ".items[] | select(.name == \"$APP_NAME\") | .id")
-
-if [[ -z "$APP_ID" ]]; then
-  echo "::error::Application '$APP_NAME' not found."
-  exit 1
+APP_ID=$(hcloud CAE ListApplications --X-Environment-ID="$ENV_ID" --project_id="$PROJECT_ID" 2>/dev/null | jq -r ".items[] | select(.name == \"$APP_NAME\") | .id")
+if [ -z "$APP_ID" ]; then
+    echo "Error: Application '$APP_NAME' not found."
+    exit 1
 fi
 
 echo "Found Application ID: $APP_ID"
 
 # Get Component ID
-COMPONENT_ID=$(hcloud CAE ListComponents \
-  --X-Environment-ID="$ENV_ID" \
-  --application_id="$APP_ID" \
-  --project_id="$PROJECT_ID" 2>/dev/null |
-  jq -r ".items[] | select(.name == \"$COMPONENT_NAME\") | .id")
-
-if [[ -z "$COMPONENT_ID" ]]; then
-  echo "::error::Component '$COMPONENT_NAME' not found."
-  exit 1
+COMPONENT_ID=$(hcloud CAE ListComponents --X-Environment-ID="$ENV_ID" --application_id="$APP_ID" --project_id="$PROJECT_ID" 2>/dev/null | jq -r ".items[] | select(.name == \"$COMPONENT_NAME\") | .id")
+if [ -z "$COMPONENT_ID" ]; then
+    echo "Error: Component '$COMPONENT_NAME' not found."
+    exit 1
 fi
 
 echo "Found Component ID: $COMPONENT_ID"
@@ -98,9 +86,9 @@ NAMESPACE=$(echo "$RESPONSE" | jq -r '.spec.source.code.namespace')
 URL=$(echo "$RESPONSE" | jq -r '.spec.source.url')
 
 # Ensure extracted values are valid
-if [[ -z "$AUTH_NAME" || -z "$NAMESPACE" || -z "$URL" ]]; then
-  echo "::error::Failed to extract component source configuration."
-  exit 1
+if [ -z "$AUTH_NAME" ] || [ -z "$NAMESPACE" ] || [ -z "$URL" ]; then
+    echo "Error: Failed to extract required fields."
+    exit 1
 fi
 
 
@@ -132,7 +120,7 @@ hcloud CAE ExecuteAction \
   --spec.source.code.namespace="$NAMESPACE" \
   --spec.source.code.dockerfile_path="$DOCKERFILE_PATH"
 
-echo "Deployment triggered successfully."
+echo "Deployment successfully."
 
 # Cleanup sensitive data
 unset ACCESS_KEY
@@ -144,7 +132,8 @@ unset APP_NAME
 unset COMPONENT_NAME
 unset VERSION
 unset BRANCH
+history -c
+rm -f /home/runner/entrypoint.sh
 unset DOCKERFILE_PATH
-history -c || true
 
 echo "Sensitive data cleared."
