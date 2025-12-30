@@ -122,7 +122,7 @@ hcloud CAE ExecuteAction \
   --spec.source.code.branch="$BRANCH" \
   --spec.source.code.auth_name="$AUTH_NAME" \
   --spec.source.code.namespace="$NAMESPACE" \
-  --spec.source.code.dockerfile_path="$DOCKERFILE_PATH"
+  --spec.build.parameters.dockerfile_path="$DOCKERFILE_PATH"
 
 echo "Deployment successful."
 
