@@ -37,7 +37,12 @@ inputs:
   branch:
     description: "Github branch"
     required: true
-    default: "main"    
+    default: "main"
+  dockerfile_path:
+    description: "Path to Dockerfile relative to repository root"
+    required: false
+    default: "Dockerfile"
+
 runs:
   using: "docker"
   image: "Dockerfile"
@@ -50,5 +55,6 @@ runs:
     ACCESS_KEY: ${{ inputs.accessKey }}
     SECRET_KEY: ${{ inputs.secretKey }}
     REGION: ${{ inputs.region }}
-    EPI: ${{inputs.enterprise_project_id}}
-    BRANCH: ${{inputs.branch}}
+    EPI: ${{ inputs.enterprise_project_id }}
+    BRANCH: ${{ inputs.branch }}
+    DOCKERFILE_PATH: ${{ inputs.dockerfile_path }}
