@@ -123,7 +123,7 @@ hcloud CAE ExecuteAction \
   --spec.source.code.auth_name="$AUTH_NAME" \
   --spec.source.code.namespace="$NAMESPACE" \
   --spec.build.parameters.dockerfile_path="$DOCKERFILE_PATH"
-  --spec.build.archive.artifact_namespace="$ARTIFACT_NAMESPACE"
+  --spec.build.archive.artifact_namespace="secureid_digital_repos"
 
 echo "Deployment successful."
 
