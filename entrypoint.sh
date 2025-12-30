@@ -80,6 +80,10 @@ if [ -z "$RESPONSE" ]; then
     exit 1
 fi
 
+echo "Component Details:"
+echo "$RESPONSE" | jq .
+
+
 # Extract auth_name, namespace, and URL
 AUTH_NAME=$(echo "$RESPONSE" | jq -r '.spec.source.code.auth_name')
 NAMESPACE=$(echo "$RESPONSE" | jq -r '.spec.source.code.namespace')
@@ -132,8 +136,9 @@ unset APP_NAME
 unset COMPONENT_NAME
 unset VERSION
 unset BRANCH
+unset DOCKERFILE_PATH
 history -c
 rm -f /home/runner/entrypoint.sh
-unset DOCKERFILE_PATH
+
 
 echo "Sensitive data cleared."
