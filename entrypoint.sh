@@ -124,7 +124,7 @@ hcloud CAE ExecuteAction \
   --spec.source.code.namespace="$NAMESPACE" \
   --spec.source.code.dockerfile_path="$DOCKERFILE_PATH"
 
-echo "Deployment successfully."
+echo "Deployment successful."
 
 # Cleanup sensitive data
 unset ACCESS_KEY
